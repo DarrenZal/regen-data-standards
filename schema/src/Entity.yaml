@@ -25,6 +25,31 @@ classes:
       type:
         range: EntityTypes
         required: true
+      rid:
+        slot_uri: rfs:rid
+        description: >-
+          Stable, resolvable identifier for this Entity — a KOI entity URI or an
+          ORN RID (e.g. "orn:regen.entity:wsanec-leadership-council"). This is the
+          target that a reference-style slot resolves against.
+
+          WHY THIS EXISTS: as the schema moves from inlining Entities to
+          referencing them (see the claimRefs / attestationRefs change in the
+          Output Record Contract, PR #55), a `uriorcurie` reference needs
+          something to point AT. Today Entity has only name, type and
+          walletAddress — so a reference can be written but never resolved, and
+          two Entities are distinguishable only by display name.
+
+          OPTIONAL, DELIBERATELY. Making this an `identifier: true` slot would be
+          correct but is a breaking change: Entity is inlined by Claim (x2),
+          Attestation, and ProjectInfo (x6), and every existing instance omits it.
+          The intended path is: emitters begin populating rid -> instances are
+          backfilled -> the slot is promoted to required / identifier in a
+          subsequent, deliberate migration. Proposing the first step only.
+
+          NOT the same as walletAddress: that binds a semantic identity to a
+          signing key and is absent for most entities. This is the identity
+          itself.
+        range: uriorcurie
       walletAddress:
         slot_uri: rfs:walletAddress
         description: >-
