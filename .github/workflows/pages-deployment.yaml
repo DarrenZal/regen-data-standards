@@ -38,6 +38,8 @@ jobs:
       - name: Build
         run: pnpm run build
       - name: Publish
+        id: publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'regen-network/regen-data-standards'
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -45,3 +47,7 @@ jobs:
           projectName: regen-data-standards
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report skipped publishing
+        if: steps.publish.outcome == 'skipped'
+        run: |
+          printf '%s\n' 'Cloudflare publishing skipped. Site builds run on pull requests; publishing runs only for pushes to main in regen-network/regen-data-standards.' >> "$GITHUB_STEP_SUMMARY"
